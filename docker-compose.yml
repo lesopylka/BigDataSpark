@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16.6
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports: ["127.0.0.1:5433:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/01_start.sql:/docker-entrypoint-initdb.d/01_start.sql:ro
+      - ./sql/02_ddl.sql:/docker-entrypoint-initdb.d/02_ddl.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 30
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    environment:
+      CLICKHOUSE_USER: lab
+      CLICKHOUSE_PASSWORD: lab
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports: ["127.0.0.1:8123:8123"]
+    volumes: ["clickhouse_data:/var/lib/clickhouse"]
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--user", "lab", "--password", "lab", "--query", "SELECT 1"]
+      interval: 5s
+      retries: 30
+  load:
+    build:
+      context: .
+      dockerfile: Dockerfile.tools
+    command: python Scripts/load.py
+    depends_on:
+      postgres: {condition: service_healthy}
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    command: /opt/spark/bin/spark-submit --master local[2] --packages org.postgresql:postgresql:42.7.4 Scripts/etl.py
+    depends_on:
+      load: {condition: service_completed_successfully}
+      clickhouse: {condition: service_healthy}
+volumes:
+  postgres_data:
+  clickhouse_data:
