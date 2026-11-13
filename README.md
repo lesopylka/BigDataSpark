@@ -94,7 +94,7 @@ docker compose run --rm spark
 
 ```bash
 docker compose exec -T postgres psql -U postgres -v ON_ERROR_STOP=1 < Scripts/migrate_product.sql
-docker compose run --rm spark
+docker compose run --build --rm spark
 ```
 
 Для чистой базы используется новый DDL автоматически. Миграцию можно повторять.
