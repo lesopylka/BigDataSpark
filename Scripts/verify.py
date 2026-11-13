@@ -4,6 +4,7 @@ from decimal import Decimal
 from pathlib import Path
 import psycopg
 import requests
+from check_reports import check_reports
 
 
 def main():
@@ -27,6 +28,12 @@ def main():
         response = requests.post("http://clickhouse:8123/", auth=("lab", "lab"), data="SELECT sum(value) FROM lab.report_products WHERE metric = 'category_revenue'", timeout=30)
         response.raise_for_status()
         assert abs(Decimal(response.text.strip()) - Decimal(expected["total_amount"])) < Decimal("0.01")
+        reports = {}
+        for name in ["stores", "suppliers", "time"]:
+            response = requests.post("http://clickhouse:8123/", auth=("lab", "lab"), data=f"SELECT metric, entity, period, value FROM lab.report_{name} FORMAT JSONEachRow", timeout=30)
+            response.raise_for_status()
+            reports[name] = [json.loads(line) for line in response.text.splitlines()]
+        check_reports(reports)
     print("Количество продаж, ключи, количество товара и сумма совпадают с исходными данными")
 
 
