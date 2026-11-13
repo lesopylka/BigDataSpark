@@ -12,3 +12,10 @@ LEFT JOIN star.dim_seller se USING (seller_key)
 LEFT JOIN star.dim_date d USING (date_key)
 WHERE c.customer_key IS NULL OR p.product_key IS NULL OR s.store_key IS NULL
    OR sp.supplier_key IS NULL OR se.seller_key IS NULL OR d.date_key IS NULL;
+
+-- Товар должен ссылаться на существующие категорию и бренд.
+SELECT COUNT(*) AS broken_product_links
+FROM star.dim_product p
+LEFT JOIN star.dim_product_category c USING (category_key)
+LEFT JOIN star.dim_brand b USING (brand_key)
+WHERE c.category_key IS NULL OR b.brand_key IS NULL;

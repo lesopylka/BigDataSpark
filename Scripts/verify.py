@@ -18,6 +18,8 @@ def main():
         for name in ["customer", "seller", "product", "store", "supplier", "date"]:
             count = conn.execute(f"SELECT COUNT(*) FROM star.fact_sales f LEFT JOIN star.dim_{name} d USING ({name}_key) WHERE d.{name}_key IS NULL").fetchone()[0]
             assert count == 0, (name, count)
+        broken = conn.execute("SELECT COUNT(*) FROM star.dim_product p LEFT JOIN star.dim_product_category c USING (category_key) LEFT JOIN star.dim_brand b USING (brand_key) WHERE c.category_key IS NULL OR b.brand_key IS NULL").fetchone()[0]
+        assert broken == 0, broken
         for name in ["products", "customers", "time", "stores", "suppliers", "quality"]:
             response = requests.post("http://clickhouse:8123/", auth=("lab", "lab"), data=f"SELECT count() FROM lab.report_{name}", timeout=30)
             response.raise_for_status()

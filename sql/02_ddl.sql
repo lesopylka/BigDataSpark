@@ -19,17 +19,25 @@ CREATE TABLE star.dim_seller (
     seller_country TEXT NOT NULL,
     seller_postal_code TEXT NOT NULL
 );
+CREATE TABLE star.dim_product_category (
+    category_key TEXT PRIMARY KEY,
+    category_name TEXT NOT NULL UNIQUE
+);
+CREATE TABLE star.dim_brand (
+    brand_key TEXT PRIMARY KEY,
+    brand_name TEXT NOT NULL UNIQUE
+);
 CREATE TABLE star.dim_product (
     product_key TEXT PRIMARY KEY,
     product_name TEXT NOT NULL,
-    product_category TEXT NOT NULL,
+    category_key TEXT NOT NULL REFERENCES star.dim_product_category (category_key),
     product_price TEXT NOT NULL,
     product_quantity TEXT NOT NULL,
     pet_category TEXT NOT NULL,
     product_weight TEXT NOT NULL,
     product_color TEXT NOT NULL,
     product_size TEXT NOT NULL,
-    product_brand TEXT NOT NULL,
+    brand_key TEXT NOT NULL REFERENCES star.dim_brand (brand_key),
     product_material TEXT NOT NULL,
     product_description TEXT NOT NULL,
     product_rating TEXT NOT NULL,
