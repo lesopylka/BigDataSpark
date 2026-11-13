@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.spark
-    command: /opt/spark/bin/spark-submit --master local[2] --packages org.postgresql:postgresql:42.7.4 Scripts/etl.py
+    command: /opt/spark/bin/spark-submit --master local[2] Scripts/etl.py
     depends_on:
       load: {condition: service_completed_successfully}
       clickhouse: {condition: service_healthy}

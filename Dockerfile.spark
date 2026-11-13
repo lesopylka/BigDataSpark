@@ -1,6 +1,8 @@
 FROM apache/spark:3.5.3-python3
 USER root
 RUN pip install --no-cache-dir 'psycopg[binary]==3.2.3' requests==2.32.3
+RUN python3 -c "import urllib.request; urllib.request.urlretrieve('https://jdbc.postgresql.org/download/postgresql-42.7.4.jar', '/opt/spark/jars/postgresql-42.7.4.jar')" \
+    && chmod 644 /opt/spark/jars/postgresql-42.7.4.jar
 WORKDIR /app
 COPY . .
 USER 185
